@@ -1,0 +1,103 @@
+<Window x:Class="EchoBridge.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EchoBridge" Width="580" Height="550" MinWidth="500" MinHeight="500"
+        Background="#171B22" Foreground="#EAF0F7" WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded" Closing="Window_Closing">
+    <Window.Resources>
+        <SolidColorBrush x:Key="PanelBrush" Color="#222833"/>
+        <SolidColorBrush x:Key="InputBrush" Color="#2B3341"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#69C4C3"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#DDE5EF"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="{StaticResource InputBrush}"/>
+            <Setter Property="Foreground" Value="#F0F5FA"/>
+            <Setter Property="BorderBrush" Value="#465466"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="{StaticResource InputBrush}"/>
+            <Setter Property="Foreground" Value="#F0F5FA"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="#EAF0F7"/>
+            <Setter Property="Background" Value="#354354"/>
+            <Setter Property="BorderBrush" Value="#53667A"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="14"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="EchoBridge" FontSize="30" FontWeight="SemiBold" Foreground="#F4FAFF"/>
+            <TextBlock Text="Mirror playback to a second device" FontSize="13" Foreground="#9FAEBD" Margin="1,3,0,0"/>
+        </StackPanel>
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" CornerRadius="12" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="22"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="22"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="125"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="78"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Input Device" FontWeight="Medium"/>
+                <ComboBox x:Name="InputDevices" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Output Device" FontWeight="Medium"/>
+                <ComboBox x:Name="OutputDevices" Grid.Row="2" Grid.Column="1" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                <Button x:Name="RefreshButton" Grid.Row="2" Grid.Column="2" Content="Refresh" Margin="8,0,0,0" Click="Refresh_Click"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Stream Buffer" FontWeight="Medium"/>
+                <ComboBox x:Name="BufferChoices" Grid.Row="4" Grid.Column="1" Width="130" HorizontalAlignment="Left" SelectionChanged="Settings_Changed">
+                    <ComboBoxItem Content="10 ms" Tag="10"/>
+                    <ComboBoxItem Content="25 ms" Tag="25"/>
+                    <ComboBoxItem Content="50 ms" Tag="50"/>
+                    <ComboBoxItem Content="100 ms" Tag="100"/>
+                    <ComboBoxItem Content="200 ms" Tag="200"/>
+                </ComboBox>
+
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Stream Gain" FontWeight="Medium"/>
+                <Slider x:Name="GainSlider" Grid.Row="6" Grid.Column="1" Minimum="0" Maximum="150" TickFrequency="1" Value="100"
+                        VerticalAlignment="Center" ValueChanged="GainSlider_ValueChanged"/>
+                <TextBlock x:Name="GainLabel" Grid.Row="6" Grid.Column="2" Text="100%" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Stream Level" FontWeight="Medium"/>
+                <ProgressBar x:Name="LevelBar" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Height="18" Maximum="100"
+                             Foreground="{StaticResource AccentBrush}" Background="{StaticResource InputBrush}" BorderThickness="0"/>
+
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="Status" FontWeight="Medium"/>
+                <TextBlock x:Name="StatusLabel" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Text="Ready" Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap"/>
+
+                <Button x:Name="StartStopButton" Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="3"
+                        Content="▶  Start" Height="50" FontSize="17" FontWeight="SemiBold"
+                        Background="#227A69" BorderBrush="#329782" Click="StartStop_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
