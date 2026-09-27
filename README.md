@@ -15,9 +15,9 @@
 3. В **Output Device** выберите другое устройство воспроизведения, куда нужна копия звука.
 4. Выберите буфер, при необходимости настройте усиление и нажмите **Start**. Кнопка **Stop** останавливает дублирование.
 
-В списках показаны активные render endpoints. Кнопка **Refresh** обновляет оба списка; во время работы потока она недоступна. Input и Output не могут быть одним и тем же endpoint. Выбор сохраняется по внутренним ID, а не по названиям.
+В списках показаны render endpoints в состояниях Active и Unplugged. Кнопка **Refresh** обновляет оба списка; во время работы потока она недоступна. Input и Output не могут быть одним и тем же endpoint. Выбор сохраняется по внутренним ID, а не по названиям. Запуск с недоступным endpoint покажет ошибку.
 
-Для Bluetooth выбирайте стерео/A2DP endpoint. Hands-Free/AG Audio endpoints скрыты из списка. Если нужное устройство не видно, проверьте его подключение и нажмите Refresh.
+Для Bluetooth выбирайте стерео/A2DP endpoint. Hands-Free/AG Audio render endpoints также отображаются, если их публикует Windows. Если нужное устройство не видно, проверьте его подключение и нажмите Refresh.
 
 ## Буфер и задержка
 
@@ -50,7 +50,7 @@ dotnet publish .\EchoBridge.csproj -c Release -r win-x64 --self-contained true -
 ## Структура исходников
 
 - `MainWindow.xaml` / `MainWindow.xaml.cs` — WPF интерфейс и команды пользователя.
-- `Audio/AudioDeviceService.cs` — перечисление активных устройств воспроизведения.
+- `Audio/AudioDeviceService.cs` — перечисление render endpoints в состояниях Active и Unplugged.
 - `Audio/AudioRepeaterService.cs` — захват конкретного endpoint, вывод и управление потоком.
 - `Audio/GainMeterSampleProvider.cs` — усиление и индикатор пикового уровня.
 - `Models/` — ID устройств и параметры приложения.

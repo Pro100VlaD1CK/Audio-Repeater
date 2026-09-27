@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using EchoBridge.Audio;
 using EchoBridge.Models;
@@ -51,18 +52,18 @@ public partial class MainWindow : Window
         {
             var inputId = InputDevices.SelectedValue as string ?? _settings.InputEndpointId;
             var outputId = OutputDevices.SelectedValue as string ?? _settings.OutputEndpointId;
-            var devices = await Task.Run(_deviceService.GetActiveRenderDevices);
+            var devices = await Task.Run(_deviceService.GetRenderDevices);
             InputDevices.ItemsSource = devices;
             OutputDevices.ItemsSource = devices;
             InputDevices.SelectedItem = devices.FirstOrDefault(d => d.Id == inputId);
             OutputDevices.SelectedItem = devices.FirstOrDefault(d => d.Id == outputId);
-            if (devices.Count == 0) StatusLabel.Text = "No active playback devices found";
-            else if (StatusLabel.Text == "No active playback devices found") StatusLabel.Text = "Ready";
+            if (devices.Count == 0) SetStatus("No active playback devices found");
+            else if (StatusLabel.Text == "No active playback devices found") SetStatus("Ready");
         }
         catch (Exception ex)
         {
             LoggingService.Write("Device refresh failed", ex);
-            StatusLabel.Text = "Failed to list audio devices";
+            SetStatus("Failed to list audio devices");
         }
         finally { _busy = false; RefreshButton.IsEnabled = true; }
     }
@@ -95,14 +96,14 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             LoggingService.Write("Start/Stop action failed", ex);
-            StatusLabel.Text = ex switch
+            SetStatus(ex switch
             {
                 ArgumentException => ex.Message,
                 AudioStartException => ex.Message,
                 NAudio.CoreAudioApi.CoreAudioException => "Failed to open audio device or device disconnected",
                 NotSupportedException => "Unsupported audio format",
                 _ => "Failed to open input or output device"
-            };
+            });
         }
         finally
         {
@@ -124,7 +125,7 @@ public partial class MainWindow : Window
     {
         if (GainLabel is null || _settings is null) return;
         var gain = (int)Math.Round(e.NewValue);
-        GainLabel.Text = $"{gain}%";
+        GainLabel.Text = $"{gain} %";
         _repeater.SetGainPercent(gain);
         _settings.GainPercent = gain;
         _settingsService.Save(_settings);
@@ -137,23 +138,39 @@ public partial class MainWindow : Window
             if (_closingAfterCleanup) return;
             if (status == "Running" && !_repeater.IsRunning) return;
             if (status != "Running" && _repeater.IsRunning) return;
-            StatusLabel.Text = status;
+            SetStatus(status);
             UpdateControls();
         });
+    }
+
+    private void SetStatus(string status)
+    {
+        StatusLabel.Text = status;
+        var color = status switch
+        {
+            "Ready" => Color.FromRgb(85, 214, 194),
+            "Running" => Color.FromRgb(117, 217, 119),
+            _ when status.Contains("disconnected", StringComparison.OrdinalIgnoreCase) => Color.FromRgb(232, 196, 90),
+            _ => Color.FromRgb(226, 106, 106)
+        };
+        StatusLabel.Foreground = new SolidColorBrush(color);
     }
 
     private void UpdateControls()
     {
         var running = _repeater.IsRunning;
-        StartStopButton.Content = running ? "■  Stop" : "▶  Start";
-        StartStopButton.Background = running ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(153, 57, 69))
-                                             : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 122, 105));
+        StartStopIcon.Text = running ? "■" : "▶";
+        StartStopIcon.Foreground = new SolidColorBrush(running ? Color.FromRgb(238, 118, 110) : Color.FromRgb(118, 217, 132));
+        StartStopText.Text = running ? "Stop" : "Start";
         StartStopButton.IsEnabled = !_busy;
         InputDevices.IsEnabled = !running && !_busy;
         OutputDevices.IsEnabled = !running && !_busy;
         BufferChoices.IsEnabled = !running && !_busy;
         RefreshButton.IsEnabled = !running && !_busy;
     }
+
+    private void About_Click(object sender, RoutedEventArgs e) =>
+        MessageBox.Show(this, "EchoBridge\nAudio playback repeater for Windows\nVersion 1.0", "About EchoBridge", MessageBoxButton.OK, MessageBoxImage.Information);
 
     private async void Window_Closing(object? sender, CancelEventArgs e)
     {
