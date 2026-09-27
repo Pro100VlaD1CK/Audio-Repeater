@@ -1,0 +1,72 @@
+name: Release EchoBridge
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore .\EchoBridge.csproj -r win-x64
+
+      - name: Build Release
+        run: dotnet build .\EchoBridge.csproj -c Release -r win-x64 --self-contained true --no-restore
+
+      - name: Publish single-file application
+        run: >-
+          dotnet publish .\EchoBridge.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          --no-restore
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o .\artifacts\publish
+
+      - name: Verify release asset
+        shell: pwsh
+        run: |
+          $publishFiles = @(Get-ChildItem -LiteralPath ".\artifacts\publish" -File)
+          if ($publishFiles.Count -ne 1 -or $publishFiles[0].Name -ne "EchoBridge.exe") {
+            $names = $publishFiles.Name -join ", "
+            throw "Expected only EchoBridge.exe in publish output, found: $names"
+          }
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $notes = @"
+          EchoBridge — приложение для Windows, которое дублирует звук с одного устройства воспроизведения на другое через WASAPI.
+
+          Windows:
+          - Windows 11 x64
+          - self-contained
+          - установка .NET не требуется
+
+          Bluetooth может добавлять дополнительную задержку.
+          "@
+
+          gh release create $env:GITHUB_REF_NAME ".\artifacts\publish\EchoBridge.exe" `
+            --verify-tag `
+            --title "EchoBridge $env:GITHUB_REF_NAME" `
+            --notes $notes

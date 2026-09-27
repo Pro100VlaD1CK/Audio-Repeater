@@ -19,6 +19,8 @@ TestResults/
 logs/
 *.tmp
 *.bak
+*.cache
+*.binlog
 
 # Published executables and packages belong in GitHub Releases
 *.exe

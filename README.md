@@ -2,6 +2,12 @@
 
 Небольшое приложение для Windows 11 x64, которое копирует уже воспроизводящийся звук с выбранного устройства воспроизведения на второе. Основное устройство продолжает играть само. Приложение не устанавливает драйверы и не создаёт виртуальные аудиоустройства.
 
+## Скачать готовую версию
+
+[Скачать последнюю версию EchoBridge](https://github.com/Pro100VlaD1CK/Audio-Repeater/releases/latest)
+
+В разделе Releases скачайте `EchoBridge.exe`. Готовая версия предназначена для Windows 11 x64, публикуется как self-contained приложение и не требует отдельной установки .NET.
+
 ## Требования
 
 - Windows 11 x64.
@@ -10,9 +16,9 @@
 
 ## Использование
 
-1. Соберите приложение по инструкции ниже или скачайте EXE из GitHub Releases, если он опубликован, и запустите `EchoBridge.exe`.
-2. В **Input Device** выберите основной **playback / render endpoint**, на котором уже играет Windows (например, гарнитуру). Это не микрофон.
-3. В **Output Device** выберите другое устройство воспроизведения, куда нужна копия звука.
+1. Скачайте готовую версию или соберите приложение по инструкции ниже и запустите `EchoBridge.exe`.
+2. В **Input Device** выберите устройство воспроизведения, звук которого EchoBridge захватывает через WASAPI Loopback. Например: `BlackShark V3 - Game`. Это не микрофон.
+3. В **Output Device** выберите второе устройство, куда отправляется копия звука, например Bluetooth-колонку или Bluetooth-наушники.
 4. Выберите буфер, при необходимости настройте усиление и нажмите **Start**. Кнопка **Stop** останавливает дублирование.
 
 В списках показаны render endpoints в состояниях Active и Unplugged. Кнопка **Refresh** обновляет оба списка; во время работы потока она недоступна. Input и Output не могут быть одним и тем же endpoint. Выбор сохраняется по внутренним ID, а не по названиям. Запуск с недоступным endpoint покажет ошибку.
@@ -34,10 +40,19 @@
 ```powershell
 dotnet restore .\EchoBridge.csproj
 dotnet build .\EchoBridge.csproj -c Release
-dotnet publish .\EchoBridge.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o .\publish
+dotnet publish .\EchoBridge.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -o .\publish
 ```
 
-Команда publish создаёт `publish\EchoBridge.exe`. NAudio 3.1.0 подтягивается через NuGet. Целевая платформа — .NET 10 WPF, Windows x64.
+Команда publish создаёт единственный файл `publish\EchoBridge.exe`. NAudio 3.1.0 подтягивается через NuGet. Целевая платформа — .NET 10 WPF, Windows x64.
+
+## Публикация релиза
+
+Workflow `Release EchoBridge` запускается при отправке тега вида `v*`, собирает self-contained single-file версию для Windows x64 и прикрепляет `EchoBridge.exe` к GitHub Release. Для первой версии:
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ## Данные и журналы
 
