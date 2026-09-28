@@ -8,6 +8,8 @@
 
 В разделе Releases скачайте `EchoBridge.exe`. Готовая версия предназначена для Windows 11 x64, публикуется как self-contained приложение и не требует отдельной установки .NET.
 
+![Интерфейс](EchoBridge-preview-100.png)
+
 ## Требования
 
 - Windows 11 x64.
